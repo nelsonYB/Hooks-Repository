@@ -1,19 +1,59 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { todoReducer } from './todoReducer';
+
+import { TodoList } from './TodoList';
+import { TodoAdd } from './TodoAdd';
 
 import '../08-useReducer/styles.css';
 
-const initialState = [{
-    id: new Date().getTime(),
-    desc: 'Learn React',
-    done: false
-}];
 
+const init = () => {
+
+    return JSON.parse(localStorage.getItem('todos')) || [];
+
+    // return [{
+    //     id: new Date().getTime(),
+    //     desc: 'Learn React',
+    //     done: false
+    // }];
+}
 
 export const TodoApp = () => {
 
-    const [ todos ] = useReducer(todoReducer, initialState);
+    const [ todos, dispatch ] = useReducer(todoReducer, [], init);
 
+
+    useEffect( () => {
+        localStorage.setItem( 'todos', JSON.stringify( todos ) )
+    }, [todos] );
+
+    const handleDelete = (todoId) => {
+
+        const action = {
+            type: 'delete',
+            payload: todoId
+        }
+
+        dispatch(action);
+
+    }
+
+    const handleToggle = (todoId) => {
+        
+        dispatch({
+            type: 'toggle',
+            payload: todoId
+        });
+
+    }
+
+    const handleAddTodo = ( newTodo ) => {
+
+        dispatch({
+            type: 'add',
+            payload: newTodo
+        });
+    }
 
     return (
         <div>
@@ -23,40 +63,17 @@ export const TodoApp = () => {
         <div className="row">
 
             <div className="col-7">
-                <ul className="list-group list-group-flush">
-                    {
-                        todos.map( (todo, i) => (
-                            <li
-                                key={ todo.id }
-                                className="list-group-item"
-                            > 
-                                <p className="text-center"> { i + 1 }. { todo.desc } </p>
-                                <button className="btn btn-danger">
-                                    Delete
-                                </button>
-                            </li>
-                        ))
-                    }
-                </ul>
+                <TodoList 
+                    todos={ todos }
+                    handleDelete={ handleDelete }
+                    handleToggle={ handleToggle }
+                />
             </div> 
 
             <div className="col-5">
-                    <h4>Add TODO</h4>
-                    <hr></hr>
-
-                    <form>
-                       <input 
-                            type="text" 
-                            name="description"
-                            className="form-control" 
-                            placeholder="Learn..."
-                            autoComplete="off"
-                        />
-
-                        <div className="d-grid gap-2">
-                            <button className="btn btn-primary mt-1"> Add </button> 
-                        </div>
-                    </form>
+                    <TodoAdd 
+                        handleAddTodo={ handleAddTodo }
+                    />
 
             </div>
 
